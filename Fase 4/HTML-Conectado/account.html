@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>RockStore - Cuenta</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Iconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- Tus estilos -->
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+
+<body class="account-page">
+
+    <!-- NAVBAR (sustituible por includes/header.php en el futuro) -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="home.php">
+                <i class="fa-solid fa-guitar"></i> RockStore
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" 
+                    data-bs-target="#navbarNav" aria-controls="navbarNav" 
+                    aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item"><a class="nav-link" href="store.html">Tienda</a></li>
+                    <li class="nav-item"><a class="nav-link" href="offers.php">Ofertas</a></li>
+                </ul>
+
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="cart.php"><i class="fa-solid fa-cart-shopping"></i></a></li>
+                    <li class="nav-item"><a class="nav-link active" href="account.php"><i class="fa-solid fa-user"></i></a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- CONTENIDO -->
+    <div class="account-wrapper">
+        <div class="account-card">
+
+            <!-- LADO IZQUIERDO -->
+            <div class="account-left">
+                <h2>Bienvenido a RockStore</h2>
+                <p>
+                    Ingresa a tu cuenta para ver tus pedidos, favoritos y carrito.
+                    O <span class="highlight">crea una cuenta</span> para comenzar tu viaje rockero.
+                </p>
+
+                <p>Una sola cuenta para todo tu estilo. <strong>#StayLoud</strong></p>
+
+                <i class="fa-solid fa-guitar icon-bg"></i>
+            </div>
+
+            <!-- LADO DERECHO -->
+            <div class="account-right">
+
+                <!-- Tabs -->
+                <div class="account-tabs">
+                    <button class="account-tab-btn active" id="tabLogin">
+                        <i class="fa-solid fa-right-to-bracket"></i> Iniciar sesión
+                    </button>
+                    <button class="account-tab-btn" id="tabRegister">
+                        <i class="fa-solid fa-user-plus"></i> Crear cuenta
+                    </button>
+                </div>
+
+                <!-- Mensaje global -->
+                <div id="globalMessage" class="account-message"></div>
+
+                <!-- FORM LOGIN -->
+                <div id="loginFormWrapper" class="account-form active">
+                    <h3>Inicia sesión</h3>
+                    <small>Accede a tu cuenta RockStore</small>
+
+                    <form id="loginForm" class="mt-3">
+
+                        <div class="mb-3">
+                            <label class="form-label">Correo electrónico</label>
+                            <input type="email" class="form-control" id="loginEmail" name="email" placeholder="tucorreo@rock.com" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Contraseña</label>
+                            <input type="password" class="form-control" id="loginPassword" name="password" placeholder="********" required>
+                        </div>
+
+                        <button type="submit" class="account-btn">
+                            <i class="fa-solid fa-right-to-bracket"></i> Entrar
+                        </button>
+
+                        <div class="account-extra">
+                            ¿No tienes cuenta?
+                            <a href="#" id="goToRegister">Regístrate</a>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- FORM REGISTRO - ACTUALIZADO -->
+                <div id="registerFormWrapper" class="account-form">
+                    <h3>Crear cuenta</h3>
+                    <small>Regístrate para comenzar tu experiencia RockStore</small>
+
+                    <form id="registerForm" class="mt-3">
+
+                        <div class="mb-3">
+                            <label class="form-label">Nombre completo</label>
+                            <input type="text" class="form-control" id="registerName" name="name" placeholder="Nombre y apellido" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Correo electrónico</label>
+                            <input type="email" class="form-control" id="registerEmail" name="email" placeholder="tucorreo@rock.com" required>
+                        </div>
+
+                        <!-- NUEVOS CAMPOS AGREGADOS -->
+                        <div class="mb-3">
+                            <label class="form-label">Teléfono</label>
+                            <input type="tel" class="form-control" id="registerPhone" name="phone" placeholder="+52 55 1234 5678">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">País</label>
+                            <input type="text" class="form-control" id="registerCountry" name="country" placeholder="México">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Dirección</label>
+                            <textarea class="form-control" id="registerAddress" name="address" rows="2" placeholder="Calle Principal #123, Ciudad"></textarea>
+                        </div>
+                        <!-- FIN NUEVOS CAMPOS -->
+
+                        <div class="mb-3">
+                            <label class="form-label">Contraseña</label>
+                            <input type="password" class="form-control" id="registerPassword" name="password" placeholder="Mínimo 8 caracteres" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Confirmar contraseña</label>
+                            <input type="password" class="form-control" id="registerPasswordConfirm" placeholder="Repite tu contraseña" required>
+                        </div>
+
+                        <button type="submit" class="account-btn">
+                            <i class="fa-solid fa-user-plus"></i> Crear cuenta
+                        </button>
+
+                        <div class="account-extra">
+                            ¿Ya tienes cuenta?
+                            <a href="#" id="goToLogin">Inicia sesión</a>
+                        </div>
+
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!--             SCRIPTS DE AUTENTICACIÓN       -->
+    <script>
+        // Elementos para control de pestañas (tabs) de login/registro
+        const tabLogin = document.getElementById('tabLogin'); // Pestaña "Iniciar Sesión"
+        const tabRegister = document.getElementById('tabRegister'); // Pestaña "Registrarse"
+        const loginWrapper = document.getElementById('loginFormWrapper');// Contenedor formulario login
+        const registerWrapper = document.getElementById('registerFormWrapper');// Contenedor formulario registro
+        const goToRegister = document.getElementById('goToRegister');// Link "Crear una cuenta"
+        const goToLogin = document.getElementById('goToLogin'); // Link "Ya tengo cuenta"
+         // Elemento para mostrar mensajes globales al usuario
+        const globalMessage = document.getElementById('globalMessage');
+        // 2. FUNCIÓN PARA CAMBIAR ENTRE PESTAÑAS
+        function setTab(mode) {
+            if (mode === 'login') {
+                tabLogin.classList.add('active');
+                tabRegister.classList.remove('active');
+                loginWrapper.classList.add('active');
+                registerWrapper.classList.remove('active');
+            } else {
+                tabLogin.classList.remove('active');
+                tabRegister.classList.add('active');
+                loginWrapper.classList.remove('active');
+                registerWrapper.classList.add('active');
+            }
+            
+            globalMessage.classList.remove('show', 'success', 'error');
+            globalMessage.textContent = '';
+        }
+
+        tabLogin.addEventListener('click', () => setTab('login'));
+        tabRegister.addEventListener('click', () => setTab('register'));
+
+        goToRegister.addEventListener('click', (e) => {
+            e.preventDefault();
+            setTab('register');
+        });
+
+        goToLogin.addEventListener('click', (e) => {
+            e.preventDefault();
+            setTab('login');
+        });
+         // 4. FUNCIÓN PARA MOSTRAR MENSAJES AL USUARIO
+        function showGlobalMessage(text, type = 'error') {
+            globalMessage.textContent = text;
+            globalMessage.classList.remove('success', 'error');
+            globalMessage.classList.add(type === 'success' ? 'success' : 'error', 'show');
+        }
+
+        /* ============================
+           LOGIN
+        ============================ */
+        const loginForm = document.getElementById('loginForm');
+
+        loginForm.addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const formData = new FormData(loginForm);
+
+            try {
+                const response = await fetch('../backend/auth/login.php', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+                console.log("Respuesta login:", data); // para debug
+
+                if (!data.success) {
+                    showGlobalMessage(data.message || 'Error al iniciar sesión.');
+                    return;
+                }
+
+                showGlobalMessage(data.message || 'Inicio exitoso.', 'success');
+
+                // USAR EL REDIRECT DEL BACKEND
+                const redirectUrl = data.redirect;
+
+                setTimeout(() => {
+                    window.location.href = redirectUrl;
+                }, 800);
+
+            } catch (error) {
+                console.error('Error al iniciar sesión:', error);
+                showGlobalMessage('Error de conexión con el servidor.', 'error');
+            }
+        });
+        /* ============================
+           REGISTRO
+        ============================ */
+        const registerForm = document.getElementById('registerForm');
+
+        registerForm.addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const pass = document.getElementById('registerPassword').value.trim();
+            const confirm = document.getElementById('registerPasswordConfirm').value.trim();
+
+            if (pass.length < 8) {
+                showGlobalMessage('La contraseña debe tener al menos 8 caracteres.');
+                return;
+            }
+            if (pass !== confirm) {
+                showGlobalMessage('Las contraseñas no coinciden.');
+                return;
+            }
+
+            const formData = new FormData(registerForm);
+
+            try {
+                const response = await fetch('../backend/auth/registro.php', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (!data.success) {
+                    showGlobalMessage(data.message || 'Error al registrarse.');
+                    return;
+                }
+
+                showGlobalMessage(data.message || 'Te registraste correctamente.', 'success');
+
+                setTimeout(() => {
+                    setTab('login');
+                }, 900);
+
+            } catch (error) {
+                console.error('Registro error:', error);
+                showGlobalMessage('Error de conexión.');
+            }
+        });
+    </script>
+
+</body>
+</html>

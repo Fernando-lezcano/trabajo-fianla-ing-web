@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RockStore - Admin Inventario</title>
+
+    <!-- Bootstrap CSS -->
+    <link 
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" 
+        rel="stylesheet">
+
+    <!-- Font Awesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Tu CSS -->
+    <link rel="stylesheet" href="../css/styles.css">
+
+</head>
+
+<body>
+
+    <!-- 🔵 METANAVEGACIÓN -->
+    <div class="top-meta">
+        <a href="#">Iniciar sesión</a>
+        <a href="#">Registrarse</a>
+        <input type="text" placeholder="Buscar...">
+    </div>
+
+    <!-- 🔵 NAVBAR PRINCIPAL -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark px-3">
+        <a class="navbar-brand" href="">🎸 RockStore</a>
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#menu">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="menu">
+            <ul class="navbar-nav ms-3">
+            </ul>
+            <!-- Enlaces Cart y Account alineados a la derecha -->
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="accountusuario.php">
+                        <i class="fas fa-user"></i> Cuenta
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Header -->
+    <div class="admin-header">
+        <!-- Puedes poner un título o breadcrumb si quieres -->
+    </div>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- User Icon -->
+        <i class="fas fa-user-circle user-icon"></i>
+
+        <!-- Tab Navigation -->
+        <div class="tab-navigation">
+            <button class="tab-btn active" onclick="showTab('productos')">Productos</button>
+            <button class="tab-btn" onclick="showTab('reportes')">Reportes</button>
+        </div>
+
+        <!-- ==================== PRODUCTOS SECTION ==================== -->
+        <div id="productosSection">
+            <!-- Section Header -->
+            <div class="section-header">
+                <h2 class="section-title">Registrar productos</h2>
+                <button class="new-product-btn" onclick="openModal('new')">
+                    <i class="fas fa-plus"></i> Nuevo Producto
+                </button>
+            </div>
+
+            <!-- Products Table -->
+            <div class="products-table-container">
+                <h3 class="table-title">Lista de productos</h3>
+
+                <table class="products-table" id="productsTable">
+                    <thead>
+                        <tr>
+                            <th>Código</th>
+                            <th>Producto</th>
+                            <th>Imagen</th>
+                            <th>Categoría</th>
+                            <th>Precio</th>
+                            <th>Stock</th>
+                            <th>Oferta</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                        <!-- Se rellena dinámicamente desde JS -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Update Button -->
+            <button class="update-btn" onclick="updateInventory()">
+                <i class="fas fa-sync-alt"></i> Actualizar
+            </button>
+
+            <!-- Edit Icon (bottom right) -->
+            <div class="edit-icon" title="Editar configuración">
+                <i class="fas fa-edit"></i>
+            </div>
+        </div>
+        <!-- ==================== FIN PRODUCTOS SECTION ==================== -->
+
+        <!-- ==================== REPORTES SECTION ==================== -->
+        <div id="reportesSection" style="display: none;">
+            <div class="section-header">
+                <h2 class="section-title">Reportes e Inventario</h2>
+                <button class="new-product-btn" onclick="generateReport()">
+                    <i class="fas fa-file-download"></i> Exportar PDF
+                </button>
+            </div>
+
+            <!-- Stats Cards -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #dc3545 0%, #a91220 100%);">
+                        <i class="fas fa-box"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h4 id="totalProducts">0</h4>
+                        <p>Total Productos</p>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);">
+                        <i class="fas fa-dollar-sign"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h4 id="totalValue">$0.00</h4>
+                        <p>Valor Inventario</p>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h4 id="lowStock">0</h4>
+                        <p>Stock Bajo</p>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #17a2b8 0%, #117a8b 100%);">
+                        <i class="fas fa-tags"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h4 id="categories">0</h4>
+                        <p>Categorías</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts Row -->
+            <div class="charts-row">
+                <div class="chart-container">
+                    <h5>Productos por Categoría</h5>
+                    <canvas id="categoryChart"></canvas>
+                </div>
+
+                <div class="chart-container">
+                    <h5>Estado del Stock</h5>
+                    <canvas id="stockChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Tabla de resumen -->
+            <div class="products-table-container mt-4">
+                <h3 class="table-title">Resumen por Categoría</h3>
+                <table class="products-table">
+                    <thead>
+                        <tr>
+                            <th>Categoría</th>
+                            <th>Cantidad</th>
+                            <th>Stock Total</th>
+                            <th>Valor Total</th>
+                            <th>Promedio Precio</th>
+                        </tr>
+                    </thead>
+                    <tbody id="summaryTableBody">
+                        <!-- Llenado dinámicamente -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <!-- ==================== FIN REPORTES SECTION ==================== -->
+
+    </div>
+
+    <!-- Modal for New/Edit Product -->
+    <div class="modal-overlay" id="productModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modalTitle">Nuevo Producto</h3>
+                <button class="close-modal" onclick="closeModal()">&times;</button>
+            </div>
+
+            <!-- FORMULARIO -->
+            <form id="productForm" enctype="multipart/form-data">
+                <input type="hidden" id="productId" name="id">
+
+                <div class="form-group">
+                    <label>Código</label>
+                    <input type="text" id="codigo" name="codigo" placeholder="PROD003" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Nombre del Producto</label>
+                    <input type="text" id="producto" name="producto" placeholder="Ej: Guitarra eléctrica" required>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Subcategoría</label>
+                        <select id="categoria" name="subcategoria" required>
+                            <option value="">Seleccionar...</option>
+                            <!-- IMPORTANTE: usa slugs reales de la BD -->
+                            <option value="cuerda">Cuerda</option>
+                            <option value="percusion">Percusión</option>
+                            <option value="viento">Viento</option>
+                            <option value="camisas-hombre">Camisas hombre</option>
+                            <option value="chalecos">Chalecos</option>
+                            <option value="gorras">Gorras</option>
+                            <option value="camisas-mujer">Camisas mujer</option>
+                            <option value="accesorios-mujer">Accesorios mujer</option>
+                            <option value="vestidos">Vestidos</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Precio</label>
+                        <input type="number" id="precio" name="precio" placeholder="0.00" step="0.01" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Stock</label>
+                        <input type="number" id="stock" name="stock" placeholder="0" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Estado</label>
+                        <select id="estado" name="estado" required>
+                            <option value="En Stock">En Stock</option>
+                            <option value="Stock bajo">Stock bajo</option>
+                            <option value="Agotado">Agotado</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Imagen del producto -->
+                <div class="form-group">
+                    <label>Imagen del producto</label>
+                    <input type="file" id="imagen" name="imagen" accept="image/*">
+                    <div class="image-preview-wrapper">
+                        <img id="imagenPreview" class="image-preview" src="" alt="Vista previa" style="display:none;">
+                    </div>
+                </div>
+
+                <!-- Oferta -->
+                <div class="form-group">
+                    <label style="display:flex; align-items:center; gap:8px; font-weight:500;">
+                        ¿Este producto tiene oferta?
+                        <input type="checkbox" id="tieneOferta" style="margin-left:8px;">
+                    </label>
+
+                    <div id="ofertaContainer" class="oferta-container" style="display:none;">
+                        <h4>Configuración de oferta</h4>
+
+                        <div class="oferta-row">
+                            <div class="form-group">
+                                <label>Tipo de oferta</label>
+                                <select id="tipoOferta">
+                                    <option value="">Seleccionar...</option>
+                                    <option value="porcentaje">Porcentaje (%)</option>
+                                    <option value="precio_fijo">Precio fijo ($)</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Valor de la oferta</label>
+                                <input type="number" id="valorOferta" placeholder="Ej: 20 ó 49.99" step="0.01">
+                            </div>
+                        </div>
+                    
+                
+
+                        <small style="font-size:12px; color:#666;">
+                            Si seleccionas "Porcentaje", el valor es un % de descuento.<br>
+                            Si seleccionas "Precio fijo", el valor es el nuevo precio en oferta.
+                        </small>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn-cancel" onclick="closeModal()">Cancelar</button>
+                    <button type="submit" class="btn-save">Guardar</button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Chart.js para las gráficas de reportes -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        // Array de productos con campos extendidos para imagen y oferta
+        // Array global que se llenará desde el backend
+        let products = [];
+        let subcategories = [];
+
+        // Cargar subcategorias desde el backend (JSON)
+        async function loadSubcategories() {
+            try {
+                const response = await fetch('../backend/categorias/listar.php');
+                if (!response.ok) {
+                    throw new Error('Error HTTP: ' + response.status);
+                }
+                const data = await response.json();
+                subcategories = Array.isArray(data) ? data : [];
+
+                const select = document.getElementById('categoria');
+                if (!select) return;
+
+                // Limpiar opciones actuales
+                select.innerHTML = '<option value="">Seleccionar...</option>';
+
+                // Agrupar por categoría para mostrar más bonito (Instrumentos, Ropa Hombre, etc.)
+                const grouped = {};
+                subcategories.forEach(sc => {
+                    if (!grouped[sc.category_name]) {
+                        grouped[sc.category_name] = [];
+                    }
+                    grouped[sc.category_name].push(sc);
+                });
+
+                // Crear <optgroup> por categoría
+                Object.keys(grouped).forEach(catName => {
+                    const optgroup = document.createElement('optgroup');
+                    optgroup.label = catName;
+
+                    grouped[catName].forEach(sc => {
+                        const opt = document.createElement('option');
+                        opt.value = sc.subcategory_slug;          // lo que el backend espera (slug)
+                        opt.textContent = sc.subcategory_name;    // lo que ve el admin
+                        select.appendChild(opt);
+                    });
+
+                    select.appendChild(optgroup);
+                });
+
+            } catch (error) {
+                console.error('Error al cargar subcategorías:', error);
+                showNotification('No se pudieron cargar las subcategorías', 'danger');
+            }
+        }
+
+        // Cargar productos desde el backend (JSON)
+        async function loadProducts() {
+            try {
+                const response = await fetch('../backend/productos/listar.php'); // ajusta la ruta si tu admin está en otra carpeta
+
+                if (!response.ok) {
+                    throw new Error('Error HTTP: ' + response.status);
+                }
+
+                const data = await response.json();
+
+                // data debe ser un array de productos según listar.php
+                products = Array.isArray(data) ? data : [];
+
+                renderTable();      // ya existente
+                // Si estás en la pestaña de reportes, actualiza
+                const reportesSection = document.getElementById('reportesSection');
+                if (reportesSection && reportesSection.style.display !== 'none') {
+                    updateReports(); // ya existente
+                }
+
+            } catch (error) {
+                console.error('Error al cargar productos:', error);
+                showNotification('No se pudieron cargar los productos', 'danger');
+            }
+        }
+
+
+        let editingIndex = -1;
+        let currentImageData = null; // almacena la imagen actual (base64/URL) del formulario
+
+        const imagenInput = document.getElementById('imagen');
+        const imagenPreview = document.getElementById('imagenPreview');
+        const tieneOfertaCheckbox = document.getElementById('tieneOferta');
+        const ofertaContainer = document.getElementById('ofertaContainer');
+        const tipoOfertaSelect = document.getElementById('tipoOferta');
+        const valorOfertaInput = document.getElementById('valorOferta');
+
+        // Manejo de preview de imagen
+        imagenInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) {
+                currentImageData = null;
+                imagenPreview.style.display = 'none';
+                imagenPreview.src = '';
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(ev) {
+                currentImageData = ev.target.result;
+                imagenPreview.src = currentImageData;
+                imagenPreview.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        });
+
+        // Mostrar / ocultar bloque de oferta
+        tieneOfertaCheckbox.addEventListener('change', function() {
+            if (this.checked) {
+                ofertaContainer.style.display = 'block';
+            } else {
+                ofertaContainer.style.display = 'none';
+                tipoOfertaSelect.value = '';
+                valorOfertaInput.value = '';
+            }
+        });
+
+        function openModal(mode, index = -1) {
+            const modal = document.getElementById('productModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const form = document.getElementById('productForm');
+            const hiddenId = document.getElementById('productId');
+
+            if (mode === 'new') {
+                modalTitle.textContent = 'Nuevo Producto';
+                form.reset();
+                editingIndex = -1;
+                hiddenId.value = '';              // 👈 limpiar id
+                currentImageData = null;
+                imagenPreview.style.display = 'none';
+                imagenPreview.src = '';
+                tieneOfertaCheckbox.checked = false;
+                ofertaContainer.style.display = 'none';
+                tipoOfertaSelect.value = '';
+                valorOfertaInput.value = '';
+            } else {
+                modalTitle.textContent = 'Editar Producto';
+                editingIndex = index;
+                const product = products[index];
+
+                hiddenId.value = product.id || '';   // 👈 guardar id en el hidden
+
+                document.getElementById('codigo').value = product.codigo;
+                document.getElementById('producto').value = product.producto;
+                // OJO: en "categoria" ahora guardamos el slug, pero listar.php te manda el nombre de subcategoría.
+                // Por ahora puedes dejar esto vacío o mapear luego.
+                // document.getElementById('categoria').value = ???;
+                document.getElementById('categoria').value = product.subcategoriaSlug || '';
+
+                document.getElementById('precio').value = product.precio;
+                document.getElementById('stock').value = product.stock;
+                document.getElementById('estado').value = product.estado;
+
+                // Imagen
+                currentImageData = product.imagen || null;
+                if (currentImageData) {
+                    imagenPreview.src = currentImageData;
+                    imagenPreview.style.display = 'block';
+                } else {
+                    imagenPreview.src = '';
+                    imagenPreview.style.display = 'none';
+                }
+                imagenInput.value = '';
+
+                // Oferta
+                tieneOfertaCheckbox.checked = !!product.tieneOferta;
+                if (product.tieneOferta) {
+                    ofertaContainer.style.display = 'block';
+                    tipoOfertaSelect.value = product.tipoOferta || '';
+                    valorOfertaInput.value = product.valorOferta != null ? product.valorOferta : '';
+                } else {
+                    ofertaContainer.style.display = 'none';
+                    tipoOfertaSelect.value = '';
+                    valorOfertaInput.value = '';
+                }
+            }
+
+            modal.classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('productModal').classList.remove('active');
+        }
+
+        document.getElementById('productForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const form = e.target;
+
+            const tieneOferta = tieneOfertaCheckbox.checked;
+            const tipoOferta  = tipoOfertaSelect.value;
+            const valorOferta = valorOfertaInput.value !== '' ? valorOfertaInput.value : '';
+
+            const formData = new FormData(form);
+
+            // Añadimos campos que el form no manda solo
+            formData.set('tieneOferta', tieneOferta ? '1' : '0');
+            formData.set('tipoOferta', tipoOferta);
+            formData.set('valorOferta', valorOferta);
+
+            try {
+                const response = await fetch('../backend/productos/guardar.php', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (!response.ok || !data.success) {
+                    console.error('Error al guardar producto:', data);
+                    showNotification(data.message || 'Error al guardar producto', 'danger');
+                    return;
+                }
+
+                showNotification(data.message || 'Producto guardado correctamente', 'success');
+                closeModal();
+                await loadProducts();   // recarga desde la BD
+
+            } catch (error) {
+                console.error('Error de red o servidor:', error);
+                showNotification('Error de conexión con el servidor', 'danger');
+            }
+        });
+
+        async function deleteProduct(index) {
+            const product = products[index];
+            if (!product) {
+                showNotification('Producto no encontrado en la lista', 'danger');
+                return;
+            }
+
+            if (!confirm(`¿Estás seguro de eliminar el producto "${product.producto}"?`)) {
+                return;
+            }
+
+            try {
+                const formData = new FormData();
+                formData.append('id', product.id); // 👈 importante: usamos el id que vino del backend
+
+                const response = await fetch('../backend/productos/eliminar.php', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (!response.ok || !data.success) {
+                    console.error('Error al eliminar producto:', data);
+                    showNotification(data.message || 'Error al eliminar el producto', 'danger');
+                    return;
+                }
+
+                showNotification(data.message || 'Producto eliminado correctamente', 'success');
+
+                // Recargar productos desde la BD
+                await loadProducts();
+
+            } catch (error) {
+                console.error('Error de red o servidor al eliminar:', error);
+                showNotification('Error de conexión con el servidor', 'danger');
+            }
+        }
+
+        function getOfferText(product) {
+            if (!product.tieneOferta) {
+                return 'Sin oferta';
+            }
+            if (product.tipoOferta === 'porcentaje' && product.valorOferta != null) {
+                return `Descuento ${product.valorOferta}%`;
+            }
+            if (product.tipoOferta === 'precio_fijo' && product.valorOferta != null) {
+                return `Oferta: $${product.valorOferta.toFixed(2)}`;
+            }
+            return 'Con oferta';
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+
+            products.forEach((product, index) => {
+                const stockClass = product.stock < 10 ? 'stock-low' : 'stock-ok';
+                const offerText = getOfferText(product);
+                const imageCell = product.imagen
+                    ? `<img src="${product.imagen}" alt="Imagen ${product.producto}" class="product-thumb">`
+                    : `<span class="no-image"><i class="fas fa-image"></i></span>`;
+                
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${product.codigo}</td>
+                        <td>${product.producto}</td>
+                        <td>${imageCell}</td>
+                        <td>${product.categoria}</td>
+                        <td>$${product.precio.toFixed(2)}</td>
+                        <td>${product.stock}</td>
+                        <td>${offerText}</td>
+                        <td><span class="stock-badge ${stockClass}">${product.estado}</span></td>
+                        <td>
+                            <button class="action-btn" onclick="openModal('edit', ${index})">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="action-btn delete-btn" onclick="deleteProduct(${index})">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            // Si la pestaña de reportes está visible, actualiza los datos
+            const reportesSection = document.getElementById('reportesSection');
+            if (reportesSection && reportesSection.style.display !== 'none') {
+                updateReports();
+            }
+        }
+
+        function updateInventory() {
+            showNotification('Inventario actualizado correctamente', 'success');
+        }
+
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            const bgColor = type === 'success' ? '#28a745' : '#dc3545';
+            
+            notification.style.cssText = `
+                position: fixed;
+                top: 80px;
+                right: 20px;
+                background: ${bgColor};
+                color: white;
+                padding: 15px 25px;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+                z-index: 9999;
+                animation: slideIn 0.3s ease;
+            `;
+            notification.innerHTML = `<i class="fas fa-check-circle"></i> ${message}`;
+
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                notification.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+        }
+
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideIn {
+                from { transform: translateX(400px); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            @keyframes slideOut {
+                from { transform: translateX(0); opacity: 1; }
+                to { transform: translateX(400px); opacity: 0; }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // ==================== TABS (Productos / Reportes) ====================
+        function showTab(tabName) {
+            const productosSection = document.getElementById('productosSection');
+            const reportesSection = document.getElementById('reportesSection');
+            const tabButtons = document.querySelectorAll('.tab-btn');
+
+            // Ocultar secciones
+            productosSection.style.display = 'none';
+            reportesSection.style.display = 'none';
+
+            // Quitar "active" de todos los botones
+            tabButtons.forEach(btn => btn.classList.remove('active'));
+
+            // Mostrar sección seleccionada
+            if (tabName === 'productos') {
+                productosSection.style.display = 'block';
+                tabButtons[0].classList.add('active');
+            } else if (tabName === 'reportes') {
+                reportesSection.style.display = 'block';
+                tabButtons[1].classList.add('active');
+                updateReports();
+            }
+        }
+
+        // ==================== REPORTES (Stats, Charts, Summary) ====================
+        let categoryChart = null;
+        let stockChart = null;
+
+        function updateReports() {
+            // Calcular stats
+            const totalProducts = products.length;
+            const totalValue = products.reduce((sum, p) => sum + (p.precio * p.stock), 0);
+            const lowStock = products.filter(p => p.stock < 10).length;
+            const categories = [...new Set(products.map(p => p.categoria))].length;
+
+            // Actualizar tarjetas
+            document.getElementById('totalProducts').textContent = totalProducts;
+            document.getElementById('totalValue').textContent = `$${totalValue.toFixed(2)}`;
+            document.getElementById('lowStock').textContent = lowStock;
+            document.getElementById('categories').textContent = categories;
+
+            // Gráficas y tabla
+            updateCharts();
+            updateSummaryTable();
+        }
+
+        function updateCharts() {
+            // Agrupar productos por categoría
+            const categoryData = {};
+            products.forEach(p => {
+                if (!categoryData[p.categoria]) {
+                    categoryData[p.categoria] = 0;
+                }
+                categoryData[p.categoria]++;
+            });
+
+            const categoryLabels = Object.keys(categoryData);
+            const categoryValues = Object.values(categoryData);
+
+            // Destruir gráficos previos
+            if (categoryChart) categoryChart.destroy();
+            if (stockChart) stockChart.destroy();
+
+            // Gráfica de categorías (Doughnut)
+            const categoryCtx = document.getElementById('categoryChart').getContext('2d');
+            categoryChart = new Chart(categoryCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: categoryLabels,
+                    datasets: [{
+                        data: categoryValues,
+                        backgroundColor: [
+                            '#dc3545',
+                            '#28a745',
+                            '#ffc107',
+                            '#17a2b8',
+                            '#6f42c1',
+                            '#fd7e14'
+                        ],
+                        borderWidth: 2,
+                        borderColor: '#1a1a1a'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                color: '#fff',
+                                padding: 15,
+                                font: { size: 12 }
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Distribución por Categoría',
+                            color: '#fff',
+                            font: { size: 16, weight: 'bold' }
+                        }
+                    }
+                }
+            });
+
+            // Gráfica de estado de stock (Bar)
+            const stockCategories = {
+                'En Stock': products.filter(p => p.stock >= 10).length,
+                'Stock Bajo': products.filter(p => p.stock < 10 && p.stock > 0).length,
+                'Agotado': products.filter(p => p.stock === 0).length
+            };
+
+            const stockCtx = document.getElementById('stockChart').getContext('2d');
+            stockChart = new Chart(stockCtx, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(stockCategories),
+                    datasets: [{
+                        label: 'Cantidad de Productos',
+                        data: Object.values(stockCategories),
+                        backgroundColor: [
+                            '#28a745',
+                            '#ffc107',
+                            '#dc3545'
+                        ],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                color: '#dcdcdc',
+                                stepSize: 1
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                color: '#dcdcdc'
+                            },
+                            grid: {
+                                display: false
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        title: {
+                            display: true,
+                            text: 'Estado del Stock',
+                            color: '#fff',
+                            font: { size: 16, weight: 'bold' }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateSummaryTable() {
+            const categoryStats = {};
+
+            // Calcular stats por categoría
+            products.forEach(p => {
+                if (!categoryStats[p.categoria]) {
+                    categoryStats[p.categoria] = {
+                        count: 0,
+                        totalStock: 0,
+                        totalValue: 0,
+                        prices: []
+                    };
+                }
+                categoryStats[p.categoria].count++;
+                categoryStats[p.categoria].totalStock += p.stock;
+                categoryStats[p.categoria].totalValue += p.precio * p.stock;
+                categoryStats[p.categoria].prices.push(p.precio);
+            });
+
+            // Rellenar tabla
+            const tbody = document.getElementById('summaryTableBody');
+            tbody.innerHTML = '';
+
+            Object.keys(categoryStats).forEach(category => {
+                const stats = categoryStats[category];
+                const avgPrice = stats.prices.reduce((a, b) => a + b, 0) / stats.prices.length;
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${category}</td>
+                        <td>${stats.count}</td>
+                        <td>${stats.totalStock}</td>
+                        <td>$${stats.totalValue.toFixed(2)}</td>
+                        <td>$${avgPrice.toFixed(2)}</td>
+                    </tr>
+                `;
+            });
+        }
+
+        async function generateReport() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            // Título
+            doc.setFontSize(18);
+            doc.text("Reporte de Inventario - RockStore", 14, 20);
+
+            // Totales
+            doc.setFontSize(12);
+            doc.text(`Total de productos: ${products.length}`, 14, 35);
+
+            const totalValor = products.reduce((sum, p) => sum + (p.precio * p.stock), 0);
+            doc.text(`Valor total del inventario: $${totalValor.toFixed(2)}`, 14, 42);
+
+            // Encabezados de tabla
+            const headers = ["Código", "Producto", "Categoría", "Precio", "Stock"];
+
+            // Convertir productos a filas
+            const rows = products.map(p => [
+                p.codigo,
+                p.producto,
+                p.categoria,
+                `$${p.precio}`,
+                p.stock.toString()
+            ]);
+
+            // Agregar tabla usando autoTable (plugin muy usado con jsPDF)
+            // Necesita incluir también la librería autotable
+            doc.autoTable({
+                head: [headers],
+                body: rows,
+                startY: 50,
+                styles: { fontSize: 10 }
+            });
+
+            // Descargar el PDF
+            doc.save(`reporte_inventario_${Date.now()}.pdf`);
+        }
+
+
+        // Render inicial de la tabla
+        loadSubcategories();
+        loadProducts();
+    </script>
+
+    <!-- Script para menús (si lo usas en otras páginas) -->
+    <script>
+        function toggleSubmenu(id) {
+            document.getElementById(id).classList.toggle("show-submenu");
+        }
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+</body>
+</html>
