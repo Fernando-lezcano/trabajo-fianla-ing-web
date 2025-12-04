@@ -1,0 +1,429 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Galaxia del Amor</title>
+
+<style>
+body, html {
+    margin: 0;
+    height: 100%;
+    background: #000;
+    overflow: hidden;
+}
+canvas {
+    display: block;
+}
+
+/* PLAYER */
+.player {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: 600px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    border: 2px solid #f60;
+    border-radius: 999px;
+    background: transparent;
+    box-shadow: 0 0 15px #f60, 0 0 30px #f30;
+    z-index: 1000;
+    font-family: Arial, sans-serif;
+    color: #fff;
+    font-size: 14px;
+}
+.player button {
+    background: transparent;
+    border: none;
+    color: #fff;
+    font-size: 22px;
+    cursor: pointer;
+    filter: drop-shadow(0 0 6px #ff6600);
+    transition: transform .2s;
+}
+.player button:hover {
+    transform: scale(1.2);
+    filter: drop-shadow(0 0 10px #ff3300);
+}
+.progress {
+    flex-grow: 1;
+    height: 14px;
+    background: rgba(255,255,255,0.12);
+    border-radius: 999px;
+    overflow: hidden;
+    cursor: pointer;
+    position: relative;
+}
+.progress-bar {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(270deg, #f60, #f30, #f09, #f60);
+    background-size: 400% 400%;
+    border-radius: 999px;
+    box-shadow: 0 0 10px #f60;
+    animation: flowing 6s ease infinite;
+}
+@keyframes flowing {
+    0% { background-position: 0 50% }
+    50% { background-position: 100% 50% }
+    100% { background-position: 0 50% }
+}
+.time {
+    min-width: 74px;
+    text-align: right;
+    font-size: 12px;
+    color: #fff;
+    text-shadow: 0 0 5px #f60;
+}
+</style>
+</head>
+
+<body>
+
+<canvas id="c"></canvas>
+
+<!-- MUSIC PLAYER -->
+<div class="player">
+    <button id="play">▶️</button>
+    <div class="progress" id="progress"><div class="progress-bar" id="progress-bar"></div></div>
+    <div class="time" id="time">0:00 / 0:00</div>
+</div>
+
+<!-- AUDIO -->
+<audio id="audio" loop>
+    <source src="https://www.dropbox.com/scl/fi/qfv28rqu6b36jwusao4x4/Love.MP3?rlkey=ptjd053374f028aa4jfcfrfxn&st=1j0j51eo&raw=1" type="audio/mpeg">
+</audio>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.148.0/build/three.min.js"></script>
+
+<script>
+/* AUDIO PLAYER */
+const audio = document.getElementById("audio"),
+      playBtn = document.getElementById("play"),
+      progress = document.getElementById("progress"),
+      progressBar = document.getElementById("progress-bar"),
+      timeDisplay = document.getElementById("time");
+
+let isPlaying = false;
+
+function formatTime(s){
+    if (!isFinite(s)) return "0:00";
+    return Math.floor(s/60) + ":" + Math.floor(s%60).toString().padStart(2,"0");
+}
+
+playBtn.addEventListener("click", async () => {
+    if (isPlaying){
+        audio.pause();
+        playBtn.textContent = "▶️";
+    } else {
+        await audio.play();
+        playBtn.textContent = "⏸️";
+    }
+    isPlaying = !isPlaying;
+});
+
+audio.addEventListener("timeupdate", () => {
+    const p = (audio.currentTime / audio.duration) * 100;
+    progressBar.style.width = (isFinite(p) ? p : 0) + "%";
+    timeDisplay.textContent = formatTime(audio.currentTime) + " / " + formatTime(audio.duration);
+});
+
+progress.addEventListener("click", e => {
+    const rect = progress.getBoundingClientRect();
+    const pos = (e.clientX - rect.left) / rect.width;
+    if (isFinite(audio.duration)) audio.currentTime = pos * audio.duration;
+});
+
+/* THREE.JS GALAXY */
+const canvas = document.getElementById("c");
+const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+renderer.setSize(innerWidth, innerHeight);
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(60, innerWidth / innerHeight, 0.1, 5000);
+
+let targetDist = 300, currentDist = 300;
+let rotX = 0.2, rotY = 0;
+
+/* BACKGROUND */
+const loader = new THREE.TextureLoader();
+const nebulaTex = loader.load("https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/cube/space/px.jpg");
+scene.background = nebulaTex;
+
+/* STARS */
+(function createStars(count = 2000, radius = 3000){
+    const g = new THREE.BufferGeometry();
+    const p = new Float32Array(count * 3);
+    for (let i=0;i<count;i++){
+        const r = radius * (.3 + .7*Math.random());
+        const phi = Math.random()*Math.PI*2;
+        const costheta = Math.acos(2*Math.random()-1);
+        p[3*i]   = r*Math.sin(costheta)*Math.cos(phi);
+        p[3*i+1] = r*Math.cos(costheta);
+        p[3*i+2] = r*Math.sin(costheta)*Math.sin(phi);
+    }
+    g.setAttribute("position", new THREE.BufferAttribute(p,3));
+    scene.add(new THREE.Points(g,new THREE.PointsMaterial({ size:1.5, color:0xffffff, depthWrite:false })));
+})();
+
+/* CENTER CORE */
+const coreMat = new THREE.MeshPhongMaterial({ color:0x111111, transparent:true, opacity:0.6, shininess:200 });
+const core = new THREE.Mesh(new THREE.SphereGeometry(40,64,64), coreMat);
+scene.add(core);
+
+/* CENTER TEXT */
+function makeCenterTextTexture(str){
+    const canvas = document.createElement("canvas");
+    canvas.width = 512;
+    canvas.height = 512;
+    const ctx = canvas.getContext("2d");
+    ctx.font="bold 80px Arial";
+    ctx.textAlign="center";
+    ctx.textBaseline="middle";
+    ctx.fillStyle="#ff0033";
+    ctx.shadowColor="#ff66aa";
+    ctx.shadowBlur=50;
+    ctx.fillText(str, canvas.width/2, canvas.height/2);
+    return new THREE.CanvasTexture(canvas);
+}
+
+const centerTex = makeCenterTextTexture("TE AMO ❤️");
+const centerSprite = new THREE.Sprite(new THREE.SpriteMaterial({map:centerTex,transparent:true}));
+centerSprite.scale.set(60,60,1);
+scene.add(centerSprite);
+
+/* GLOW */
+function makeGlow(size=768){
+    const c=document.createElement("canvas");
+    c.width=c.height=size;
+    const g=c.getContext("2d");
+    const grad=g.createRadialGradient(size/2,size/2,size*0.05,size/2,size/2,size*0.5);
+    grad.addColorStop(0,"rgba(255,160,0,0.9)");
+    grad.addColorStop(0.5,"rgba(255,60,0,0.5)");
+    grad.addColorStop(1,"rgba(0,0,0,0)");
+    g.fillStyle=grad;
+    g.fillRect(0,0,size,size);
+    return new THREE.CanvasTexture(c);
+}
+
+const glow=new THREE.Sprite(new THREE.SpriteMaterial({map:makeGlow(),transparent:true,depthWrite:false}));
+glow.scale.set(500,500,1);
+scene.add(glow);
+
+/* RINGS */
+function ringTexture(size=768){
+    const c=document.createElement("canvas");
+    c.width=c.height=size;
+    const ctx=c.getContext("2d");
+    ctx.translate(size/2,size/2);
+    const inner=size*0.34, outer=size*0.49;
+    const g=ctx.createRadialGradient(0,0,inner*0.3,0,0,outer);
+    g.addColorStop(0,"rgba(255,255,200,1)");
+    g.addColorStop(0.3,"rgba(255,160,60,0.9)");
+    g.addColorStop(0.65,"rgba(255,80,0,0.6)");
+    g.addColorStop(1,"rgba(0,0,0,0)");
+    ctx.fillStyle=g;
+    ctx.beginPath();
+    ctx.arc(0,0,outer,0,Math.PI*2);
+    ctx.arc(0,0,inner,0,Math.PI*2,true);
+    ctx.closePath();
+    ctx.fill();
+    return new THREE.CanvasTexture(c);
+}
+
+const ring1=new THREE.Mesh(new THREE.RingGeometry(60,80,128),new THREE.MeshBasicMaterial({map:ringTexture(),transparent:true,side:THREE.DoubleSide}));
+const ring2=new THREE.Mesh(new THREE.RingGeometry(85,100,128),new THREE.MeshBasicMaterial({map:ringTexture(),transparent:true,side:THREE.DoubleSide,opacity:0.6}));
+ring1.rotation.x=ring2.rotation.x=Math.PI/2;
+scene.add(ring1,ring2);
+
+/* TEXT MESSAGES (CORREGIDO) */
+function makeTextTexture(text, glow){
+    const c=document.createElement("canvas");
+    c.width=1024;     /* 🔥 antes 512 */
+    c.height=256;     /* 🔥 antes 128 */
+    const ctx=c.getContext("2d");
+
+    ctx.clearRect(0,0,c.width,c.height);
+    ctx.font="bold 80px Arial"; /* 🔥 antes 60px */
+    ctx.textAlign="center";
+    ctx.textBaseline="middle";
+    ctx.fillStyle="#fff";
+    ctx.shadowColor=glow;
+    ctx.shadowBlur=40;
+
+    ctx.fillText(text, c.width/2, c.height/2);
+    return new THREE.CanvasTexture(c);
+}
+
+const baseWords = [
+"💖 Mi amor",
+"🌞 Mi sol",
+"🌎 Mi mundo",
+"✨ Brillas",
+"❤️ Te amo",
+"🌌 Universo",
+"👑 Reina",
+"🌠 Estrella",
+"💫 Mi cielo",
+"🔥 Siempre tú",
+"🎶 Tu risa",
+"🦋 Libertad",
+"💎 Eres todo",
+"🙏 Gracias",
+"💕 Cariño",
+"🌹 Amor eterno",
+"🤗 Abrazos",
+"🌸 Esperanza",
+"🌈 Alegría",
+"🌟 Contigo",
+"🧸 Ternura",
+"🎁 Mi razón",
+"🌙 Mi destino",
+"💌 Recuerdos",
+"🕊️ Mi paz",
+"🪐 Mi universo",
+"🌊 Mi calma",
+"💡 Mi luz",
+"🍒 Dulzura",
+"🥰 Mi vida",
+"🎇 Felicidad",
+"🌻 Alegría",
+"🌺 Mi flor",
+"💜 Eternidad",
+"🌟 Sueños",
+"✨ Magia",
+"🎵 Canción",
+"🔥 Pasión",
+"⭐ Mi estrella",
+"🌴 Mi paraíso",
+"🌄 Amanecer",
+"🌃 Noche contigo",
+"🎉 Mi fiesta",
+"💫 Inspiración",
+"🌷 Siempre juntos",
+"🎀 Mi ternura",
+"🍀 Mi fortuna",
+"🪞 Mi reflejo"
+];
+
+const COLORS = ["#ff66ff","#66ccff","#ffd36b","#ff9966","#8df59a","#ffa0f8","#c6a7ff","#ff4444","#44ff99","#99ccff"];
+
+const WORDS = [];
+for(let i=0;i<6;i++) WORDS.push(...baseWords);
+
+const textGroup = new THREE.Group();
+scene.add(textGroup);
+
+for (let i=0;i<WORDS.length;i++){
+    const tex = makeTextTexture(WORDS[i], COLORS[i%COLORS.length]);
+    const mat = new THREE.SpriteMaterial({map:tex, transparent:true});
+    const s = new THREE.Sprite(mat);
+
+    s.scale.set(80,25,1);  /* 🔥 antes 50×16 */
+
+    const phi = Math.acos(2*Math.random()-1);
+    const theta = Math.random()*Math.PI*2;
+    const radius = 150 + 120*Math.random();
+    s.position.set(
+        radius*Math.sin(phi)*Math.cos(theta),
+        radius*Math.cos(phi),
+        radius*Math.sin(phi)*Math.sin(theta)
+    );
+
+    s.userData = {phi, theta, radius, speed: .001 + .001*Math.random()};
+    textGroup.add(s);
+}
+
+/* CAMERA CONTROL */
+let dragging=false,lastX=0,lastY=0;
+
+function onDown(e){
+    dragging=true;
+    const t=e.touches?e.touches[0]:e;
+    lastX=t.clientX; lastY=t.clientY;
+}
+function onMove(e){
+    if(!dragging) return;
+    const t=e.touches?e.touches[0]:e;
+    const dx=(t.clientX-lastX)/innerWidth;
+    const dy=(t.clientY-lastY)/innerHeight;
+    rotY-=3*dx;
+    rotX=Math.max(-1.2,Math.min(1.2,rotX-2.2*dy));
+    lastX=t.clientX; lastY=t.clientY;
+}
+function onUp(){ dragging=false; }
+
+addEventListener("mousedown",onDown);
+addEventListener("mousemove",onMove);
+addEventListener("mouseup",onUp);
+
+addEventListener("touchstart",onDown,{passive:true});
+addEventListener("touchmove",onMove,{passive:true});
+addEventListener("touchend",onUp,{passive:true});
+
+/* MOUSE ZOOM */
+addEventListener("wheel", e=>{
+    targetDist += .25 * e.deltaY;
+    targetDist = Math.max(160, Math.min(600, targetDist));
+},{passive:true});
+
+/* TOUCH PINCH */
+let pinch=0;
+addEventListener("touchmove", e=>{
+    if(e.touches && e.touches.length===2){
+        e.preventDefault();
+        const dx=e.touches[0].clientX - e.touches[1].clientX;
+        const dy=e.touches[0].clientY - e.touches[1].clientY;
+        const dist = Math.hypot(dx,dy);
+        if(pinch){
+            targetDist += .5*(pinch - dist);
+            targetDist = Math.max(160, Math.min(600, targetDist));
+        }
+        pinch = dist;
+    }
+},{passive:false});
+
+addEventListener("touchend",()=>pinch=0,{passive:true});
+
+/* ANIMATION LOOP */
+let t=0;
+function tick(){
+    requestAnimationFrame(tick);
+    t+=0.01;
+
+    ring1.rotation.z += 0.002;
+    ring2.rotation.z -= 0.0015;
+
+    glow.scale.set(500*(1+0.03*Math.sin(0.4*t)), 500*(1+0.03*Math.sin(0.4*t)), 1);
+
+    const s = 1 + 0.05*Math.sin(3*t);
+    core.scale.set(s,s,s);
+
+    textGroup.children.forEach(o=>{
+        o.material.opacity = 0.8 + 0.2*Math.sin(2*t);
+        o.userData.theta += o.userData.speed;
+
+        o.position.x = o.userData.radius * Math.sin(o.userData.phi) * Math.cos(o.userData.theta);
+        o.position.z = o.userData.radius * Math.sin(o.userData.phi) * Math.sin(o.userData.theta);
+    });
+
+    currentDist += 0.06*(targetDist-currentDist);
+
+    const cx=Math.cos(rotX), sy=Math.sin(rotX), cy=Math.cos(rotY), si=Math.sin(rotY);
+    camera.position.set(currentDist*si*cx, currentDist*sy, currentDist*cy*cx);
+    camera.lookAt(0,0,0);
+
+    renderer.render(scene,camera);
+}
+
+tick();
+</script>
+
+</body>
+</html>
